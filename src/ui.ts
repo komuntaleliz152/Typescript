@@ -26,6 +26,15 @@ export function renderTodos(
     return a.order - b.order;
   });
 
+  // Empty state
+  if (filtered.length === 0) {
+    const empty = document.createElement('li');
+    empty.className = 'empty-state';
+    empty.textContent = filter === 'completed' ? 'No completed tasks yet.' : filter === 'pending' ? 'No pending tasks. All done! 🎉' : 'No tasks yet. Add one above.';
+    list.appendChild(empty);
+    return;
+  }
+
   filtered.forEach(todo => {
       const li = document.createElement('li');
       li.className = `todo-item priority-${todo.priority}`;
@@ -35,13 +44,14 @@ export function renderTodos(
 
       const today = new Date().toISOString().split('T')[0] as string;
       const isOverdue = !todo.completed && todo.dueDate < today;
+      const isDueToday = !todo.completed && todo.dueDate === today;
 
       li.innerHTML = `
         <div class="todo-meta">
           <span class="todo-text">${todo.text}</span>
           <div class="todo-info">
             <span class="priority-badge ${todo.priority}">${todo.priority}</span>
-            <span class="due-date ${isOverdue ? 'overdue' : ''}">📅 ${todo.dueDate}</span>
+            <span class="due-date ${isOverdue ? 'overdue' : isDueToday ? 'due-today' : ''}">📅 ${todo.dueDate}${isDueToday ? ' — Due today!' : ''}</span>
           </div>
         </div>
         <div class="actions">
