@@ -1,5 +1,6 @@
 import { loadTodos, saveTodos } from './storage.js';
 import { renderTodos, setActiveFilter, updateProgress } from './ui.js';
+import { toast, confirm } from './feedback.js';
 let todos = loadTodos();
 let nextId = todos.length ? Math.max(...todos.map(t => t.id)) + 1 : 1;
 let filter = 'all';
@@ -11,17 +12,27 @@ function refresh() {
     updateProgress(todos);
 }
 function toggleTodo(id) {
+    const todo = todos.find(t => t.id === id);
+    if (!todo)
+        return;
     todos = todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    toast(todo.completed ? `"${todo.text}" marked as pending.` : `"${todo.text}" completed! 🎉`, 'success');
     refresh();
 }
-function deleteTodo(id) {
-    if (!confirm('Delete this task?'))
+async function deleteTodo(id) {
+    const todo = todos.find(t => t.id === id);
+    if (!todo)
+        return;
+    const yes = await confirm(`Delete "${todo.text}"? This can't be undone.`);
+    if (!yes)
         return;
     todos = todos.filter(t => t.id !== id);
+    toast(`"${todo.text}" deleted.`, 'error');
     refresh();
 }
 function editTodo(id, text) {
     todos = todos.map(t => t.id === id ? { ...t, text } : t);
+    toast('Task updated.', 'info');
     refresh();
 }
 function reorderTodos(orderedIds) {
@@ -47,7 +58,7 @@ addBtn.addEventListener('click', () => {
     if (!text)
         return;
     if (!dateInput.value) {
-        alert('Please pick a due date.');
+        toast('Please pick a due date.', 'error');
         return;
     }
     const todo = {
@@ -59,6 +70,7 @@ addBtn.addEventListener('click', () => {
         order: todos.length,
     };
     todos.push(todo);
+    toast(`"${text}" added to your list.`, 'success');
     input.value = '';
     dateInput.value = '';
     priorityInput.value = 'medium';

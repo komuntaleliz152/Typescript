@@ -119,6 +119,25 @@
     .del-btn { color: #ff4d4d; }
     .del-btn:hover { background: #ffe5e5; }
     .edit-btn:hover { background: #e8f5e9; }
+
+    /* Toasts */
+    #toast-container { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 999; align-items: center; }
+    .toast { padding: 12px 24px; border-radius: 8px; font-size: 0.95rem; color: #fff; opacity: 0; transform: translateY(-10px); transition: all 0.3s; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast-success { background: #2e7d32; }
+    .toast-error { background: #e53935; }
+    .toast-info { background: #1565c0; }
+
+    /* Confirm dialog */
+    #confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; }
+    #confirm-overlay.show { display: flex; }
+    #confirm-box { background: #fff; border-radius: 12px; padding: 28px 32px; max-width: 360px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+    body.dark #confirm-box { background: #1e1e1e; color: #e0e0e0; }
+    #confirm-message { margin-bottom: 20px; font-size: 1rem; line-height: 1.5; }
+    .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    #confirm-yes { padding: 8px 20px; background: #e53935; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+    #confirm-no { padding: 8px 20px; background: #eee; color: #333; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+    body.dark #confirm-no { background: #333; color: #e0e0e0; }
   </style>
 </head>
 <body>
@@ -161,6 +180,19 @@
 
     <ul id="todo-list"></ul>
   </div>
+
+  <div id="toast-container"></div>
+
+  <div id="confirm-overlay">
+    <div id="confirm-box">
+      <p id="confirm-message"></p>
+      <div class="confirm-actions">
+        <button id="confirm-no">Cancel</button>
+        <button id="confirm-yes">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="./index.js"></script>
 </body>
 </html>

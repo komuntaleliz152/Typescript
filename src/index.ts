@@ -1,6 +1,7 @@
 import type { Todo, Filter, SortBy } from './types.js';
 import { loadTodos, saveTodos } from './storage.js';
 import { renderTodos, setActiveFilter, updateProgress } from './ui.js';
+import { toast, confirm } from './feedback.js';
 
 let todos: Todo[] = loadTodos();
 let nextId: number = todos.length ? Math.max(...todos.map(t => t.id)) + 1 : 1;
@@ -15,18 +16,26 @@ function refresh(): void {
 }
 
 function toggleTodo(id: number): void {
+  const todo = todos.find(t => t.id === id);
+  if (!todo) return;
   todos = todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+  toast(todo.completed ? `"${todo.text}" marked as pending.` : `"${todo.text}" completed! 🎉`, 'success');
   refresh();
 }
 
-function deleteTodo(id: number): void {
-  if (!confirm('Delete this task?')) return;
+async function deleteTodo(id: number): Promise<void> {
+  const todo = todos.find(t => t.id === id);
+  if (!todo) return;
+  const yes = await confirm(`Delete "${todo.text}"? This can't be undone.`);
+  if (!yes) return;
   todos = todos.filter(t => t.id !== id);
+  toast(`"${todo.text}" deleted.`, 'error');
   refresh();
 }
 
 function editTodo(id: number, text: string): void {
   todos = todos.map(t => t.id === id ? { ...t, text } : t);
+  toast('Task updated.', 'info');
   refresh();
 }
 
@@ -53,7 +62,7 @@ dateInput.min = new Date().toISOString().split('T')[0] as string;
 addBtn.addEventListener('click', () => {
   const text = input.value.trim();
   if (!text) return;
-  if (!dateInput.value) { alert('Please pick a due date.'); return; }
+  if (!dateInput.value) { toast('Please pick a due date.', 'error'); return; }
   const todo: Todo = {
     id: nextId++,
     text,
@@ -63,6 +72,7 @@ addBtn.addEventListener('click', () => {
     order: todos.length,
   };
   todos.push(todo);
+  toast(`"${text}" added to your list.`, 'success');
   input.value = '';
   dateInput.value = '';
   priorityInput.value = 'medium';
