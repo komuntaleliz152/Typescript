@@ -24,11 +24,21 @@ function editTodo(id, text) {
 const input = document.getElementById('todo-input');
 const addBtn = document.getElementById('add-btn');
 const dateInput = document.getElementById('todo-date');
+// Prevent picking past dates
+dateInput.min = new Date().toISOString().split('T')[0];
 addBtn.addEventListener('click', () => {
     const text = input.value.trim();
     if (!text)
         return;
-    todos.push({ id: nextId++, text, completed: false, dueDate: dateInput.value || undefined });
+    if (!dateInput.value) {
+        alert('Please pick a due date.');
+        return;
+    }
+    const dueDate = dateInput.value || undefined;
+    const todo = dueDate
+        ? { id: nextId++, text, completed: false, dueDate }
+        : { id: nextId++, text, completed: false };
+    todos.push(todo);
     input.value = '';
     dateInput.value = '';
     refresh();

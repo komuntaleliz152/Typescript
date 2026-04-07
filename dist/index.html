@@ -24,17 +24,11 @@
 
     h1 { font-size: 1.8rem; color: #1a1a2e; margin-bottom: 24px; }
 
-    .input-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .input-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 
-    #todo-input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
+    .input-row .row { display: flex; gap: 8px; }
+
+    #todo-input { flex: 1; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; }
 
     #todo-input:focus { border-color: #2e7d32; }
 
@@ -99,6 +93,7 @@
     }
 
     #todo-date {
+      flex: 1;
       padding: 10px 10px;
       border: 1.5px solid #ddd;
       border-radius: 8px;
@@ -139,9 +134,13 @@
   <div class="container">
     <h1>Todo List</h1>
     <div class="input-row">
-      <input type="text" id="todo-input" placeholder="Enter a task">
-      <input type="date" id="todo-date">
-      <button id="add-btn">Add</button>
+      <div class="row">
+        <input type="text" id="todo-input" placeholder="Enter a task">
+        <button id="add-btn">Add</button>
+      </div>
+      <div class="row">
+        <input type="date" id="todo-date">
+      </div>
     </div>
     <div class="filters">
       <button class="filter-btn active" data-filter="all">All</button>

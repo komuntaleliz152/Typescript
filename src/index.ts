@@ -32,10 +32,18 @@ const input = document.getElementById('todo-input') as HTMLInputElement;
 const addBtn = document.getElementById('add-btn') as HTMLButtonElement;
 const dateInput = document.getElementById('todo-date') as HTMLInputElement;
 
+// Prevent picking past dates
+dateInput.min = new Date().toISOString().split('T')[0] as string;
+
 addBtn.addEventListener('click', () => {
   const text = input.value.trim();
   if (!text) return;
-  todos.push({ id: nextId++, text, completed: false, dueDate: dateInput.value || undefined });
+  if (!dateInput.value) { alert('Please pick a due date.'); return; }
+  const dueDate = dateInput.value || undefined;
+  const todo: Todo = dueDate
+    ? { id: nextId++, text, completed: false, dueDate }
+    : { id: nextId++, text, completed: false };
+  todos.push(todo);
   input.value = '';
   dateInput.value = '';
   refresh();
