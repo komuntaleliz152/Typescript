@@ -1,15 +1,17 @@
-import type { Todo, Filter } from './types.js';
+import type { Todo, Filter, SortBy } from './types.js';
 import { loadTodos, saveTodos } from './storage.js';
-import { renderTodos, setActiveFilter } from './ui.js';
+import { renderTodos, setActiveFilter, updateProgress } from './ui.js';
 
 let todos: Todo[] = loadTodos();
 let nextId: number = todos.length ? Math.max(...todos.map(t => t.id)) + 1 : 1;
 let filter: Filter = 'all';
+let sortBy: SortBy = 'order';
 
 function refresh(): void {
   saveTodos(todos);
-  renderTodos(todos, filter, toggleTodo, deleteTodo, editTodo);
+  renderTodos(todos, filter, sortBy, toggleTodo, deleteTodo, editTodo, reorderTodos);
   setActiveFilter(filter);
+  updateProgress(todos);
 }
 
 function toggleTodo(id: number): void {
@@ -18,6 +20,7 @@ function toggleTodo(id: number): void {
 }
 
 function deleteTodo(id: number): void {
+  if (!confirm('Delete this task?')) return;
   todos = todos.filter(t => t.id !== id);
   refresh();
 }
@@ -27,31 +30,46 @@ function editTodo(id: number, text: string): void {
   refresh();
 }
 
-// Add
+function reorderTodos(orderedIds: number[]): void {
+  orderedIds.forEach((id, index) => {
+    const todo = todos.find(t => t.id === id);
+    if (todo) todo.order = index;
+  });
+  refresh();
+}
+
+// DOM refs
 const input = document.getElementById('todo-input') as HTMLInputElement;
 const addBtn = document.getElementById('add-btn') as HTMLButtonElement;
 const dateInput = document.getElementById('todo-date') as HTMLInputElement;
+const priorityInput = document.getElementById('todo-priority') as HTMLSelectElement;
+const sortSelect = document.getElementById('sort-by') as HTMLSelectElement;
+const darkToggle = document.getElementById('dark-toggle') as HTMLButtonElement;
 
-// Prevent picking past dates
+// Prevent past dates
 dateInput.min = new Date().toISOString().split('T')[0] as string;
 
+// Add todo
 addBtn.addEventListener('click', () => {
   const text = input.value.trim();
   if (!text) return;
   if (!dateInput.value) { alert('Please pick a due date.'); return; }
-  const dueDate = dateInput.value || undefined;
-  const todo: Todo = dueDate
-    ? { id: nextId++, text, completed: false, dueDate }
-    : { id: nextId++, text, completed: false };
+  const todo: Todo = {
+    id: nextId++,
+    text,
+    completed: false,
+    dueDate: dateInput.value,
+    priority: priorityInput.value as Todo['priority'],
+    order: todos.length,
+  };
   todos.push(todo);
   input.value = '';
   dateInput.value = '';
+  priorityInput.value = 'medium';
   refresh();
 });
 
-input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') addBtn.click();
-});
+input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addBtn.click(); });
 
 // Filters
 document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -59,6 +77,21 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     filter = (btn as HTMLElement).dataset['filter'] as Filter;
     refresh();
   });
+});
+
+// Sort
+sortSelect.addEventListener('change', () => {
+  sortBy = sortSelect.value as SortBy;
+  refresh();
+});
+
+// Dark mode
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') document.body.classList.add('dark');
+
+darkToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
 });
 
 refresh();

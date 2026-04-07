@@ -2,7 +2,10 @@ export interface Todo {
   id: number;
   text: string;
   completed: boolean;
-  dueDate?: string; // ISO date string YYYY-MM-DD
+  dueDate: string;
+  priority: 'low' | 'medium' | 'high';
+  order: number;
 }
 
 export type Filter = 'all' | 'pending' | 'completed';
+export type SortBy = 'order' | 'dueDate' | 'priority';
