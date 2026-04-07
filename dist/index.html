@@ -107,6 +107,17 @@
     .due-date.overdue { color: #e53935; font-weight: 600; }
     .due-date.due-today { color: #fb8c00; font-weight: 600; }
 
+    .search-row { margin-bottom: 12px; }
+    .search-row input { width: 100%; }
+
+    .list-footer { margin-top: 16px; display: flex; justify-content: flex-end; }
+    #clear-completed {
+      padding: 7px 16px; background: none; border: 1.5px solid #e53935;
+      color: #e53935; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    #clear-completed:hover { background: #e53935; color: #fff; }
+
     .empty-state {
       text-align: center; padding: 40px 16px; color: #aaa;
       font-size: 0.95rem; list-style: none;
@@ -174,6 +185,10 @@
       <span id="progress-label">0/0 completed</span>
     </div>
 
+    <div class="search-row">
+      <input type="text" id="search-input" placeholder="🔍 Search tasks...">
+    </div>
+
     <div class="controls">
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn" data-filter="pending">Pending</button>
@@ -186,6 +201,10 @@
     </div>
 
     <ul id="todo-list"></ul>
+
+    <div class="list-footer">
+      <button id="clear-completed">Clear Completed</button>
+    </div>
   </div>
 
   <div id="toast-container"></div>

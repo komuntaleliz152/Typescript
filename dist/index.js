@@ -1,15 +1,17 @@
 import { loadTodos, saveTodos } from './storage.js';
-import { renderTodos, setActiveFilter, updateProgress } from './ui.js';
+import { renderTodos, setActiveFilter, updateProgress, updateFilterCounts } from './ui.js';
 import { toast, confirm } from './feedback.js';
 let todos = loadTodos();
 let nextId = todos.length ? Math.max(...todos.map(t => t.id)) + 1 : 1;
 let filter = 'all';
 let sortBy = 'order';
+let search = '';
 function refresh() {
     saveTodos(todos);
-    renderTodos(todos, filter, sortBy, toggleTodo, deleteTodo, editTodo, reorderTodos);
+    renderTodos(todos, filter, sortBy, search, toggleTodo, deleteTodo, editTodo, reorderTodos);
     setActiveFilter(filter);
     updateProgress(todos);
+    updateFilterCounts(todos);
 }
 function toggleTodo(id) {
     const todo = todos.find(t => t.id === id);
@@ -50,6 +52,8 @@ const dateInput = document.getElementById('todo-date');
 const priorityInput = document.getElementById('todo-priority');
 const sortSelect = document.getElementById('sort-by');
 const darkToggle = document.getElementById('dark-toggle');
+const searchInput = document.getElementById('search-input');
+const clearCompletedBtn = document.getElementById('clear-completed');
 // Prevent past dates
 dateInput.min = new Date().toISOString().split('T')[0];
 // Add todo
@@ -78,6 +82,25 @@ addBtn.addEventListener('click', () => {
 });
 input.addEventListener('keydown', (e) => { if (e.key === 'Enter')
     addBtn.click(); });
+// Search
+searchInput.addEventListener('input', () => {
+    search = searchInput.value.trim().toLowerCase();
+    refresh();
+});
+// Clear completed
+clearCompletedBtn.addEventListener('click', async () => {
+    const count = todos.filter(t => t.completed).length;
+    if (!count) {
+        toast('No completed tasks to clear.', 'info');
+        return;
+    }
+    const yes = await confirm(`Clear all ${count} completed task${count > 1 ? 's' : ''}?`);
+    if (!yes)
+        return;
+    todos = todos.filter(t => !t.completed);
+    toast(`${count} completed task${count > 1 ? 's' : ''} cleared.`, 'success');
+    refresh();
+});
 // Filters
 document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {

@@ -6,6 +6,7 @@ export function renderTodos(
   todos: Todo[],
   filter: Filter,
   sortBy: SortBy,
+  search: string,
   onToggle: (id: number) => void,
   onDelete: (id: number) => void,
   onEdit: (id: number, text: string) => void,
@@ -18,7 +19,7 @@ export function renderTodos(
     if (filter === 'pending') return !t.completed;
     if (filter === 'completed') return t.completed;
     return true;
-  });
+  }).filter(t => !search || t.text.toLowerCase().includes(search));
 
   filtered = [...filtered].sort((a, b) => {
     if (sortBy === 'dueDate') return a.dueDate.localeCompare(b.dueDate);
@@ -101,6 +102,17 @@ function setupDragAndDrop(list: HTMLUListElement, onReorder: (ids: number[]) => 
 export function setActiveFilter(filter: Filter): void {
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.toggle('active', (btn as HTMLElement).dataset['filter'] === filter);
+  });
+}
+
+export function updateFilterCounts(todos: Todo[]): void {
+  const all = todos.length;
+  const pending = todos.filter(t => !t.completed).length;
+  const completed = todos.filter(t => t.completed).length;
+  const counts: Record<string, number> = { all, pending, completed };
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    const f = (btn as HTMLElement).dataset['filter'] ?? '';
+    btn.textContent = `${f.charAt(0).toUpperCase() + f.slice(1)} (${counts[f] ?? 0})`;
   });
 }
 
